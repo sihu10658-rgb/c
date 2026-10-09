@@ -25,3 +25,4 @@ elif [ -f "./ln_exec.exe" ]; then
     ./ln_exec.exe
 fi
 그리고 아직 파일 만들는중임 이런식으로
+아그리고 컴파일은 sh저거 누르면 되니 sh한번 클릭하셈
