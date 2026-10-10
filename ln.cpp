@@ -1,8 +1,7 @@
 #include <iostream>
 #include <bit>
 #include <cstdint>
-#include <vector>
-#include <chrono>
+#include <cmath>
 
 #if defined(_MSC_VER)
     #define ULTRA_FORCE_INLINE __forceinline
@@ -68,33 +67,16 @@ ULTRA_FORCE_INLINE double ultra_ln(double x) {
 }
 
 int main() {
-    constexpr int iterations = 100000000;
-    constexpr int cache_size = 4096;
-    constexpr int cache_mask = cache_size - 1;
-    std::vector<double> test_values(cache_size);
-    
-    for (uint64_t i = 0; i < cache_size; ++i) {
-        uint64_t bits = (1023ULL << 52) | (i << 40);
-        test_values[i] = std::bit_cast<double>(bits);
+    double test_values[] = {0.5, 1.0, 2.0, 5.0, 10.0, 100.0};
+
+    for (double x : test_values) {
+        double res = ultra_ln(x);
+        double std_res = std::log(x);
+        
+        std::cout << "x = " << x << "\n"
+                  << "  -> ultra_ln : " << res << "\n"
+                  << "  -> std::log  : " << std_res << "\n\n";
     }
 
-    double sum0 = 0.0, sum1 = 0.0, sum2 = 0.0, sum3 = 0.0;
-    auto start = std::chrono::high_resolution_clock::now();
-    
-    for (int i = 0; i < iterations; i += 4) {
-        ULTRA_ASSUME(iterations > 0);
-        sum0 += ultra_ln(test_values[(i + 0) & cache_mask]);
-        sum1 += ultra_ln(test_values[(i + 1) & cache_mask]);
-        sum2 += ultra_ln(test_values[(i + 2) & cache_mask]);
-        sum3 += ultra_ln(test_values[(i + 3) & cache_mask]);
-    }
-    
-    volatile double dummy = sum0 + sum1 + sum2 + sum3;
-    auto end = std::chrono::high_resolution_clock::now();
-    auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-    
-    std::cout << "Estrin ln 20 : " << static_cast<double>(ns) / iterations << " ns per call\n";
-    (void)dummy;
-    
     return 0;
 }
